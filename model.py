@@ -53,7 +53,7 @@ class VietOCRVGG16(nn.Module):
         x = x.reshape(x.size(0),x.size(1),-1)
         x = self.fc1(x)
         x = F.relu(x)
-        x, _ = self.bi_lstm(x)
+        x = self.bi_lstm(x)
         x = self.fc2(x)
         x = F.log_softmax(x, 2)
 
