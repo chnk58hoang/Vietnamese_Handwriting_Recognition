@@ -42,19 +42,22 @@ class VietOCRVGG16(nn.Module):
         self.vgg16 = vgg16(pretrained=True)
         for param in self.vgg16.parameters():
             param.requires_grad = finetune
-        self.fc1 = nn.Linear(2560, 256)
-        self.bi_lstm = Bidirectional_LSTM(input_size=256, hidden_size=256, bidirectional=True, batch_first=True)
+        self.fc1 = nn.Linear(2560, 512)
+        self.bi_lstm = nn.LSTM(512,256,bidirectional=True,batch_first=True,dropout=0.25)
         self.fc2 = nn.Linear(512, num_letters)
         self.loss_fn = nn.CTCLoss(blank=0)
+        self.dropout = nn.Dropout(0.25)
 
     def forward(self, x, target=None, target_length=None):
         x = self.vgg16.features(x)
         x = x.permute(0,3,1,2)
         x = x.reshape(x.size(0),x.size(1),-1)
         x = self.fc1(x)
+        x = self.dropout(x)
         x = F.relu(x)
-        x = self.bi_lstm(x)
+        x,_ = self.bi_lstm(x)
         x = self.fc2(x)
+        x = self.dropout(x)
         x = F.log_softmax(x, 2)
 
         if target != None and target_length != None:
