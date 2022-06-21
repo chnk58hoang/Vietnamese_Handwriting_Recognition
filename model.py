@@ -43,7 +43,7 @@ class VietOCRVGG16(nn.Module):
         for param in self.vgg16.parameters():
             param.requires_grad = finetune
         self.fc1 = nn.Linear(2560, 512)
-        self.bi_lstm = nn.LSTM(512,256)
+        self.bi_lstm = nn.LSTM(512,256,batch_first=True,bidirectional=True)
         self.fc2 = nn.Linear(512, num_letters)
         self.loss_fn = nn.CTCLoss(blank=0)
 
