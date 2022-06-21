@@ -45,6 +45,7 @@ class VietOCR(Dataset):
         # image
         image_dir = os.path.join(self.image_path, self.all_images[index])
         image = Image.open(image_dir).convert("RGB")
+        image = image.resize(self.img_w,self.img_h)
         image = self.transform(image)
 
         # label

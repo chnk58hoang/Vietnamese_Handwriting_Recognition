@@ -45,10 +45,12 @@ class VietOCRVGG16(nn.Module):
         self.fc1 = nn.Linear(2560, 256)
         self.bi_lstm = Bidirectional_LSTM(input_size=256, hidden_size=256, bidirectional=True, batch_first=True)
         self.fc2 = nn.Linear(512, num_letters)
+        self.loss_fn = nn.CTCLoss(blank=0)
 
     def forward(self, x, target=None, target_length=None):
         x = self.vgg16.features(x)
-        x = x.view(x.size(0), x.size(2), -1)
+        x = x.permute(0,3,1,2)
+        x = x.reshape(x.size(0),x.size(1),-1)
         x = self.fc1(x)
         x = F.relu(x)
         x, _ = self.bi_lstm(x)
@@ -57,9 +59,8 @@ class VietOCRVGG16(nn.Module):
 
         if target != None and target_length != None:
             x = x.permute(1, 0, 2)
-            loss_fn = nn.CTCLoss(blank=0)
             input_length = torch.full(size=(x.size(1),), fill_value=x.size(0), dtype=torch.long)
-            loss = loss_fn(x, target, input_length, target_length)
+            loss = self.loss_fn(x, target, input_length, target_length)
             return x, loss
 
         return x, None
