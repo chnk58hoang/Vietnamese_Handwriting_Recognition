@@ -63,14 +63,11 @@ def my_collate_fn(batch):
     imgs = []
     label_lengths = []
     max_label_length = 0
-    for sample in batch:
-        max_label_length = max(max_label_length, sample[2])
-
-    print(max_label_length)
+    
 
     for sample in batch:
         label = sample[1]
-        label += [1] * (max_label_length - sample[2])
+        label += [1] * (70 - sample[2])
 
         labels.append(torch.tensor(label))
         imgs.append(sample[0])
