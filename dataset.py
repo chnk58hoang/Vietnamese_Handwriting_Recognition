@@ -66,6 +66,8 @@ def my_collate_fn(batch):
     for sample in batch:
         max_label_length = max(max_label_length, sample[2])
 
+    print(max_label_length)
+
     for sample in batch:
         label = sample[1]
         label += [1] * (max_label_length - sample[2])
