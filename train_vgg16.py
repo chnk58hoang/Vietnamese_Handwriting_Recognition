@@ -1,7 +1,7 @@
 import os
 
 from data.dataset import VietOCR, my_collate_fn
-from model import VietOCRModel
+from model import VietOCRVGG16
 from engine import train_model, valid_model, inference
 from torch.utils.data import DataLoader, random_split
 from torch.optim import Adam
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     # Define network
-    model = VietOCRModel().to(device)
+    model = VietOCRVGG16(finetune=args.ft)
 
     # Define dataset and dataloader
 
