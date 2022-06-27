@@ -27,7 +27,7 @@ class GreedySearchDecoder(nn.Module):
 
         "Remove blank labels"
         for index in indices:
-            index = [self.labels[int(i)] for i in index if i != self.blank]
+            index = [self.labels[int(i)] for i in index if int(i) != self.blank]
             joined = "".join(index)
             results.append(joined)
         return results

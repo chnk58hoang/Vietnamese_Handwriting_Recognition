@@ -9,7 +9,7 @@ from PIL import Image
 letters = " #'%()+,-./:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYabcdeghiklmnopqrstuvxyzÂÊÔàáâãèéêìíòóôõùúýăĐđĩũƠơưạảấầẩậắằẵặẻẽếềểễệỉịọỏốồổỗộớờởỡợụủỨứừửữựỳỵỷỹ"
 num_letters = len(letters) + 1
 
-label_dict = {c: letters.index(c) + 1 for c in letters}
+label_dict = {letters.index(c) + 1 :c  for c in letters}
 keys_list = list(label_dict.keys())
 values_list = list(label_dict.values())
 
