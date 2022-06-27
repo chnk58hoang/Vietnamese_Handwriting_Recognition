@@ -17,12 +17,12 @@ valid_transform = A.Compose([
     A.Normalize()])
 
 
+def label_to_text(label):
+    return [label_dict[c] for c in label]
+
+
 def text_to_label(text):
-    return [label_dict[c] for c in text]
-
-
-def label_to_text(labels):
-    return "".join([keys_list[values_list.index(label)] for label in labels])
+    return [keys_list[values_list.index(c)] for c in text]
 
 
 class VietOCR(Dataset):
