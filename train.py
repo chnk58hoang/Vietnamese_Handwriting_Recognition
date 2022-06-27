@@ -1,45 +1,46 @@
-from dataset import VietOCR, my_collate_fn
+import os
+
+from data.dataset import VietOCR, my_collate_fn
 from model import VietOCRVGG16
-from engine import train_model, valid_model
+from engine import train_model, valid_model, inference
 from torch.utils.data import DataLoader, random_split
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from random import shuffle
 import torch
 import argparse
-
-
-def split_dataset(dataset, ratio):
-    len_dataset1 = int(len(dataset) * ratio)
-    len_dataset2 = len(dataset) - len_dataset1
-
-    dataset1, dataset2 = random_split(dataset, lengths=[len_dataset1, len_dataset2])
-
-    return dataset1, dataset2
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--epoch", type=int, default=100)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--batch_size", type=int, default=8)
-    parser.add_argument("--img_path", type=str)
-    parser.add_argument("--label_path", type=str)
+    parser.add_argument("--img_path", default="archive/processed_data", type=str)
+    parser.add_argument("--label_path", default="archive/finetune_labels.json", type=str)
     parser.add_argument("--ft", type=bool, default=False)
+    parser.add_argument("--mode", type=str, default='greedy')
+
     args = parser.parse_args()
 
     # Define device
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-    # Define model
+    # Define network
     model = VietOCRVGG16(finetune=args.ft)
 
     # Define dataset and dataloader
-    all_dataset = VietOCR(image_path=args.img_path, label_path=args.label_path, img_h=160, img_w=2560)
 
-    train_val_dataset, test_dataset = split_dataset(all_dataset, ratio=0.95)
+    img_list = os.listdir(args.img_path)
+    shuffle(img_list)
 
-    train_dataset, valid_dataset = split_dataset(train_val_dataset, ratio=0.85)
+    train_img_list = img_list[:int(len(img_list) * 0.8)]
+    valid_img_list = img_list[int(len(img_list) * 0.8):]
+
+    train_dataset = VietOCR(image_path=args.img_path, image_list=train_img_list, label_path=args.label_path, img_w=2560,
+                            img_h=160, phase='train')
+    valid_dataset = VietOCR(image_path=args.img_path, image_list=valid_img_list, label_path=args.label_path, img_w=2560,
+                            img_h=160, phase='valid')
 
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=my_collate_fn)
     valid_dataloader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=my_collate_fn)
@@ -54,3 +55,4 @@ if __name__ == '__main__':
         val_loss = valid_model(model, device, valid_dataset, valid_dataloader)
         print(f'Validation loss:{val_loss}')
         lr_scheduler.step(val_loss)
+        inference(model, device, valid_dataset, args.mode)

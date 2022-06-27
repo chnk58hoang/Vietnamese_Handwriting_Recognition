@@ -1,16 +1,20 @@
 import torch
 import os
 import json
+import numpy as np
 from torch.utils.data import Dataset
-from torchvision import transforms
+import albumentations as A
 from PIL import Image
 
 letters = " #'%()+,-./:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYabcdeghiklmnopqrstuvxyzÂÊÔàáâãèéêìíòóôõùúýăĐđĩũƠơưạảấầẩậắằẵặẻẽếềểễệỉịọỏốồổỗộớờởỡợụủỨứừửữựỳỵỷỹ"
 num_letters = len(letters) + 1
 
-label_dict = {c : letters.index(c) + 1 for c in letters}
+label_dict = {c: letters.index(c) + 1 for c in letters}
 keys_list = list(label_dict.keys())
 values_list = list(label_dict.values())
+
+valid_transform = A.Compose([
+    A.Normalize()])
 
 
 def text_to_label(text):
@@ -18,25 +22,28 @@ def text_to_label(text):
 
 
 def label_to_text(labels):
-
     return "".join([keys_list[values_list.index(label)] for label in labels])
 
 
-
-
 class VietOCR(Dataset):
-    def __init__(self, image_path, label_path, img_w, img_h):
+    def __init__(self, image_path, image_list, label_path, img_w, img_h, phase):
         self.image_path = image_path
         self.label_path = label_path
-        self.all_images = os.listdir(image_path)
+        self.all_images = image_list
         self.all_labels = json.load(open(label_path)) if label_path != None else None
         self.img_w = img_w
         self.img_h = img_h
-        self.transform = transforms.Compose(
-            [transforms.RandomAffine(degrees=(-10, 10), translate=(0.1, 0.1)),
-             transforms.ToTensor(),
-             transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                  std=[0.229, 0.224, 0.225])])
+        self.phase = phase
+
+        if self.phase == 'train':
+            self.transform = A.Compose([
+                A.GaussNoise(var_limit=(100, 200), mean=30),
+                A.Cutout(num_holes=15, max_h_size=20, max_w_size=20, fill_value=(255, 255, 255)),
+                A.ElasticTransform(alpha_affine=0.5, alpha=1, sigma=0),
+                A.Normalize(), A.Resize(self.img_h, self.img_w)])
+        else:
+            self.transform = A.Compose([
+                A.Normalize(), A.Resize(self.img_h, self.img_w)])
 
     def __len__(self):
         return len(self.all_images)
@@ -45,8 +52,10 @@ class VietOCR(Dataset):
         # image
         image_dir = os.path.join(self.image_path, self.all_images[index])
         image = Image.open(image_dir).convert("RGB")
-        image = image.resize((self.img_w,self.img_h),resample=Image.BILINEAR)
-        image = self.transform(image)
+        image = np.array(image)
+        image = self.transform(image=image)['image']
+        image = torch.tensor(image, dtype=torch.float32)
+        image = image.permute(2,0,1)
 
         # label
 
@@ -62,8 +71,6 @@ def my_collate_fn(batch):
     labels = []
     imgs = []
     label_lengths = []
-    max_label_length = 0
-    
 
     for sample in batch:
         label = sample[1]
