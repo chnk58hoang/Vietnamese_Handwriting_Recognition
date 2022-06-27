@@ -2,7 +2,7 @@ import torch
 from tqdm import tqdm
 from torch.utils.data import Subset, DataLoader
 from decoder.decoder import GreedySearchDecoder, BeamSearchDecoder
-from data.dataset import label_dict, label_to_text,my_collate_fn
+from data.dataset import label_dict, label_to_text, my_collate_fn
 import editdistance
 
 
@@ -44,7 +44,7 @@ def inference(model, device, dataset, mode):
     subset_indices = torch.randint(size=(3,), low=0, high=len(dataset))
 
     subset = Subset(dataset, indices=subset_indices)
-    dataloader = DataLoader(subset, batch_size=3,collate_fn=my_collate_fn)
+    dataloader = DataLoader(subset, batch_size=3, collate_fn=my_collate_fn)
 
     if mode == 'greedy':
         decoder = GreedySearchDecoder(labels=label_dict)
@@ -65,11 +65,13 @@ def inference(model, device, dataset, mode):
         print('Predictions' + '-' * 50)
         for seq in decoded_seqs:
             all_preds.append(seq)
+            print(seq)
 
         print('Labels' + '-' * 50)
 
         for label in labels:
             all_labels.append(label_to_text(label))
+            print(label)
 
     mean_norm_ed = 0.0
     for i in range(len(all_preds)):
