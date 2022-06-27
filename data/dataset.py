@@ -18,7 +18,7 @@ valid_transform = A.Compose([
 
 
 def label_to_text(label):
-    return [label_dict[c] for c in label]
+    return [label_dict[int(c)] for c in label]
 
 
 def text_to_label(text):
