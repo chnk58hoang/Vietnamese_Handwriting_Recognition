@@ -41,6 +41,7 @@ def valid_model(model, device, dataset, dataloader):
 
 
 def inference(model, device, dataset, mode):
+    model.eval()
     subset_indices = torch.randint(size=(3,), low=0, high=len(dataset))
 
     subset = Subset(dataset, indices=subset_indices)
@@ -71,7 +72,7 @@ def inference(model, device, dataset, mode):
 
         for label in labels:
             all_labels.append(label_to_text(label))
-            print(label)
+            print(label_to_text(label))
 
     mean_norm_ed = 0.0
     for i in range(len(all_preds)):
