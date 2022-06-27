@@ -8,7 +8,7 @@ import torch.nn as nn
 class VietOCRVGG16(nn.Module):
     def __init__(self, finetune=False):
         super(VietOCRVGG16, self).__init__()
-        resnet = resnet50(pretrained=False)
+        resnet = resnet50(pretrained=True)
         self.backbone = nn.Sequential(*(list(resnet.children())[:-2]))
 
         for param in self.backbone.parameters():
