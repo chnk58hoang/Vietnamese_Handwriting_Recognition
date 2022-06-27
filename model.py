@@ -15,6 +15,7 @@ class VietOCRModel(nn.Module):
         self.bi_lstm = Bidirectional_LSTM(input_size=512, hidden_size=256, bidirectional=True, batch_first=True)
         self.fc1 = nn.Linear(2048, 512)
         self.fc2 = nn.Linear(512, num_letters)
+        self.loss_fn = nn.CTCLoss(blank=0)
 
 
     def create_convnet(self):
