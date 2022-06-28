@@ -13,6 +13,7 @@ This model is based on the proposed architecture in this paper: https://arxiv.or
 I highly recommend using conda virtual environment
 ```bash
 conda install pytorch torchvision
+pip install albumentations
 pip install editdistance
 ```
 # Dataset
@@ -32,7 +33,7 @@ I divided training process into 3 phases:
 - Phase 2: 30 epochs, unfreezed VGG, lr = 1e-4
 - Phase 3: 40 epochs, unfreezed VGG, lr = 1e-5
 ```bash
-python train.py --epochs [number of epochs] --lr [learning rate] --ft [finetune status(True or False)] --mode ['beam' or 'greedy']
+python train.py --epoch [num of epochs] --img_path [path to img directory] --label_path [path to label directory] --lr [learning rate] --batch_size [batchsize] --ft [finetune: true or false] --mode [decode mode: 'greedy' or 'beam']
 ```
 ![image](https://user-images.githubusercontent.com/71833423/163555701-29d56de7-be85-4f22-a8f3-609137a59af7.png)
 
