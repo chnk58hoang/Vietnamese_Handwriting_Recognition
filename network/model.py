@@ -19,7 +19,7 @@ class VietOCRVGG16(nn.Module):
         self.loss_fn = nn.CTCLoss(blank=0)
 
     def forward(self, x, target=None, target_length=None):
-        x = self.backbone(x)
+        x = self.backbone.features(x)
         x = x.permute(0, 3, 1, 2)
         x = x.reshape(x.size(0), x.size(1), -1)
         x = self.fc1(x)
