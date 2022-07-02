@@ -1,6 +1,6 @@
 import os
 
-from data.dataset import VietOCR, my_collate_fn
+from data.dataset import VietOCR, my_collate_fn, num_letters
 from network.model import VietOCRVGG16
 from engine import train_model, valid_model, inference
 from torch.utils.data import DataLoader
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     # Define network
-    model = VietOCRVGG16().to(device)
+    model = VietOCRVGG16(num_letters=num_letters).to(device)
 
     # Define dataset and dataloader
 
