@@ -29,15 +29,16 @@ def valid_model(model, device, dataset, dataloader):
     model = model.to(device)
     model.eval()
     valid_loss = 0.0
-    for batch, data in tqdm(enumerate(dataloader), total=int(len(dataset) / dataloader.batch_size)):
-        images = data[0].to(device)
-        targets = data[1].to(device)
-        target_lengths = data[2].to(device)
+    with torch.no_grad():
+        for batch, data in tqdm(enumerate(dataloader), total=int(len(dataset) / dataloader.batch_size)):
+            images = data[0].to(device)
+            targets = data[1].to(device)
+            target_lengths = data[2].to(device)
 
-        _, loss = model(images, targets, target_lengths)
-        valid_loss += loss.item()
+            _, loss = model(images, targets, target_lengths)
+            valid_loss += loss.item()
 
-    return valid_loss / len(dataloader)
+        return valid_loss / len(dataloader)
 
 
 def inference(model, device, dataset, mode):
@@ -55,28 +56,30 @@ def inference(model, device, dataset, mode):
     all_preds = []
     all_labels = []
 
-    for batch, data in enumerate(dataloader):
-        images = data[0].to(device)
-        labels = data[1].to(device)
 
-        log_probs, _ = model(images)
+    with torch.no_grad():
+        for batch, data in enumerate(dataloader):
+            images = data[0].to(device)
+            labels = data[1].to(device)
 
-        decoded_seqs = decoder(log_probs)
+            log_probs, _ = model(images)
 
-        print('Predictions' + '-' * 50)
-        for seq in decoded_seqs:
-            all_preds.append(seq)
-            print(seq)
+            decoded_seqs = decoder(log_probs)
 
-        print('Labels' + '-' * 50)
+            print('Predictions' + '-' * 50)
+            for seq in decoded_seqs:
+                all_preds.append(seq)
+                print(seq)
 
-        for label in labels:
-            all_labels.append(label_to_text(label))
-            print(label_to_text(label))
+            print('Labels' + '-' * 50)
 
-    mean_norm_ed = 0.0
-    for i in range(len(all_preds)):
-        mean_norm_ed += editdistance.eval(all_preds[i], all_labels[i])
-        mean_norm_ed /= len(all_labels[i])
-    mean_norm_ed /= len(all_labels)
-    print(f'Mean Normalized Edit Distance{mean_norm_ed}')
+            for label in labels:
+                all_labels.append(label_to_text(label))
+                print(label_to_text(label))
+
+        mean_norm_ed = 0.0
+        for i in range(len(all_preds)):
+            mean_norm_ed += editdistance.eval(all_preds[i], all_labels[i])
+            mean_norm_ed /= len(all_labels[i])
+        mean_norm_ed /= len(all_labels)
+        print(f'Mean Normalized Edit Distance{mean_norm_ed}')
