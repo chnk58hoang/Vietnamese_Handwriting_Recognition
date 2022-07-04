@@ -1,8 +1,7 @@
 import torch
-from torchvision.models import resnet50,vgg19
-import torch.nn as nn
-from data.dataset import label_to_text
+from torch.nn.utils.rnn import pack_padded_sequence
 
-x = [1,2,3,4,5,5,7,0,0,0,0]
+x = torch.tensor([[1,0,0],[2,0,0],[1,1,1],[2,2,0]])
 
-print(label_to_text(x))
+out = pack_padded_sequence(x,lengths=torch.tensor([1,1,3,2]),batch_first=True,enforce_sorted=False)
+print(out.data)

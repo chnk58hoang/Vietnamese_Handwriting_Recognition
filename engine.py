@@ -3,6 +3,7 @@ from tqdm import tqdm
 from torch.utils.data import Subset, DataLoader
 from decoder.decoder import GreedySearchDecoder, BeamSearchDecoder
 from data.dataset import label_dict, label_to_text, my_collate_fn
+from torch.nn.utils.rnn import pack_padded_sequence
 import editdistance
 
 
@@ -12,9 +13,9 @@ def train_model(model, device, dataset, dataloader, optimizer):
     train_loss = 0.0
     for batch, data in tqdm(enumerate(dataloader), total=int(len(dataset) / dataloader.batch_size)):
         optimizer.zero_grad()
-        images = data[0].to(device)
-        targets = data[1].to(device)
-        target_lengths = data[2].to(device)
+        images = [image.to(device) for image in data[0]]
+        targets = [torch.tensor(target) for target in data[1]]
+        target_lengths = [torch.tensor(length) for length in data[2]]
 
         _, loss = model(images, targets, target_lengths)
         train_loss += loss.item()
@@ -30,9 +31,9 @@ def valid_model(model, device, dataset, dataloader):
     valid_loss = 0.0
     with torch.no_grad():
         for batch, data in tqdm(enumerate(dataloader), total=int(len(dataset) / dataloader.batch_size)):
-            images = data[0].to(device)
-            targets = data[1].to(device)
-            target_lengths = data[2].to(device)
+            images = [image.to(device) for image in data[0]]
+            targets = [torch.tensor(target) for target in data[1]]
+            target_lengths = [torch.tensor(length) for length in data[2]]
 
             _, loss = model(images, targets, target_lengths)
             valid_loss += loss.item()
@@ -57,9 +58,9 @@ def inference(model, device, dataset, mode):
 
     with torch.no_grad():
         for batch, data in enumerate(dataloader):
-            images = data[0].to(device)
-            labels = data[1].to(device)
-            label_lengths = data[2].to(device)
+            images = [image.to(device) for image in data[0]]
+            targets = [torch.tensor(target) for target in data[1]]
+            target_lengths = [torch.tensor(length) for length in data[2]]
 
             log_probs, _ = model(images)
 
@@ -72,13 +73,13 @@ def inference(model, device, dataset, mode):
 
             print('Labels' + '-' * 50)
 
-            for label in labels:
+            for label in targets:
                 all_labels.append(label_to_text(label))
                 print(label_to_text(label))
 
         mean_norm_ed = 0.0
         for i in range(dataloader.batch_size):
             mean_norm_ed += editdistance.eval(all_preds[i], all_labels[i])
-            mean_norm_ed /= label_lengths[i]
+            mean_norm_ed /= target_lengths[i]
         mean_norm_ed /= len(all_labels)
         print(f'Mean Normalized Edit Distance{mean_norm_ed}')

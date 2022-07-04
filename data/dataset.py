@@ -3,13 +3,14 @@ import os
 import json
 import numpy as np
 from torch.utils.data import Dataset
+from torch.nn.utils.rnn import pad_sequence
 import albumentations as A
 from PIL import Image
 
 letters = " #'%()+,-./:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYabcdeghiklmnopqrstuvxyzÂÊÔàáâãèéêìíòóôõùúýăĐđĩũƠơưạảấầẩậắằẵặẻẽếềểễệỉịọỏốồổỗộớờởỡợụủỨứừửữựỳỵỷỹ"
 num_letters = len(letters) + 1
 
-label_dict = {letters.index(c) + 1 :c  for c in letters}
+label_dict = {letters.index(c) + 1: c for c in letters}
 keys_list = list(label_dict.keys())
 values_list = list(label_dict.values())
 
@@ -52,7 +53,7 @@ class VietOCR(Dataset):
         image = np.array(image)
         image = self.transform(image=image)['image']
         image = torch.tensor(image, dtype=torch.float32)
-        image = image.permute(2,0,1)
+        image = image.permute(2, 0, 1)
 
         # label
 
@@ -65,21 +66,4 @@ class VietOCR(Dataset):
 
 
 def my_collate_fn(batch):
-    labels = []
-    imgs = []
-    label_lengths = []
-
-    for sample in batch:
-        label = sample[1]
-        label += [0] * (70 - sample[2])
-
-        labels.append(torch.tensor(label))
-        imgs.append(sample[0])
-        label_lengths.append(sample[2])
-
-    imgs = torch.stack(imgs, dim=0)
-    label_lengths = torch.tensor(label_lengths)
-    labels = torch.stack(labels, dim=0)
-
-    return imgs, labels, label_lengths
-
+    return tuple(zip(*batch))
