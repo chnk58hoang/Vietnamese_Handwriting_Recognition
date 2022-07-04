@@ -12,7 +12,6 @@ def train_model(model, device, dataset, dataloader, optimizer):
     train_loss = 0.0
     for batch, data in tqdm(enumerate(dataloader), total=int(len(dataset) / dataloader.batch_size)):
         optimizer.zero_grad()
-
         images = data[0].to(device)
         targets = data[1].to(device)
         target_lengths = data[2].to(device)
@@ -56,11 +55,11 @@ def inference(model, device, dataset, mode):
     all_preds = []
     all_labels = []
 
-
     with torch.no_grad():
         for batch, data in enumerate(dataloader):
             images = data[0].to(device)
             labels = data[1].to(device)
+            label_lengths = data[2].to(device)
 
             log_probs, _ = model(images)
 
@@ -78,8 +77,8 @@ def inference(model, device, dataset, mode):
                 print(label_to_text(label))
 
         mean_norm_ed = 0.0
-        for i in range(len(all_preds)):
+        for i in range(dataloader.batch_size):
             mean_norm_ed += editdistance.eval(all_preds[i], all_labels[i])
-            mean_norm_ed /= len(all_labels[i])
+            mean_norm_ed /= label_lengths[i]
         mean_norm_ed /= len(all_labels)
         print(f'Mean Normalized Edit Distance{mean_norm_ed}')

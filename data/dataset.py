@@ -13,12 +13,9 @@ label_dict = {letters.index(c) + 1 :c  for c in letters}
 keys_list = list(label_dict.keys())
 values_list = list(label_dict.values())
 
-valid_transform = A.Compose([
-    A.Normalize()])
-
 
 def label_to_text(label):
-    return "".join([label_dict[int(c)] for c in label])
+    return "".join([label_dict[int(c)] for c in label if int(c) != 0])
 
 
 def text_to_label(text):
@@ -85,3 +82,4 @@ def my_collate_fn(batch):
     labels = torch.stack(labels, dim=0)
 
     return imgs, labels, label_lengths
+

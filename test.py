@@ -1,9 +1,8 @@
 import torch
 from torchvision.models import resnet50,vgg19
 import torch.nn as nn
+from data.dataset import label_to_text
 
+x = [1,2,3,4,5,5,7,0,0,0,0]
 
-x  = torch.rand(1,3,160,2560)
-
-model = vgg19()
-print(model.features(x).size())
+print(label_to_text(x))
