@@ -6,21 +6,10 @@ from torch.utils.data import Dataset
 from torch.nn.utils.rnn import pad_sequence
 import albumentations as A
 from PIL import Image
+import sentencepiece as spm
 
-letters = " #'%()+,-./:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYabcdeghiklmnopqrstuvxyzÂÊÔàáâãèéêìíòóôõùúýăĐđĩũƠơưạảấầẩậắằẵặẻẽếềểễệỉịọỏốồổỗộớờởỡợụủỨứừửữựỳỵỷỹ"
-num_letters = len(letters) + 1
-
-label_dict = {letters.index(c) + 1: c for c in letters}
-keys_list = list(label_dict.keys())
-values_list = list(label_dict.values())
-
-
-def label_to_text(label):
-    return "".join([label_dict[int(c)] for c in label if int(c) != 0])
-
-
-def text_to_label(text):
-    return [keys_list[values_list.index(c)] for c in text]
+sp = spm.SentencePieceProcessor()
+sp.load('vocab/m.model')
 
 
 class VietOCR(Dataset):
@@ -58,7 +47,7 @@ class VietOCR(Dataset):
         # label
 
         label = self.all_labels[self.all_images[index]]
-        label = text_to_label(label)
+        label = sp.encode_as_ids(label)
 
         label_length = len(label)
 
@@ -66,4 +55,13 @@ class VietOCR(Dataset):
 
 
 def my_collate_fn(batch):
-    return tuple(zip(*batch))
+    (images, labels, label_lengths) = zip(*batch)
+
+    all_imgs = torch.stack([img for img in images], dim=0)
+    all_labels = [torch.tensor(label) for label in labels]
+
+    all_labels = pad_sequence(all_labels, batch_first=True, padding_value=0)
+
+    all_lengths = torch.tensor([length for length in label_lengths])
+
+    return all_imgs, all_labels, all_lengths
