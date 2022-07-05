@@ -86,15 +86,20 @@ def inference(model, device, dataset, mode,decoder):
         for batch, data in enumerate(dataloader):
             images = data[0].to(device)
             labels = data[1].to(device)
+
             log_probs, _ = model(images)
+
             decoded_seqs = decoder(log_probs)
+
             for seq in decoded_seqs:
                 all_preds.append(seq)
+
             for label in labels:
                 all_labels.append(label_to_text(label))
+
         mean_norm_ed = 0.0
         for i in range(len(all_labels)):
-            print("Prediction: {0:70} Label: {1}".format(all_preds[i],
+            print("Prediction: {0:50} Label: {1}".format(all_preds[i],
                                                              all_labels[i]))
             mean_norm_ed += editdistance.eval(all_preds[i], all_labels[i])
             mean_norm_ed /= len(all_labels[i])

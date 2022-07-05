@@ -14,9 +14,6 @@ label_dict = {letters.index(c) + 1 :c  for c in letters}
 keys_list = list(label_dict.keys())
 values_list = list(label_dict.values())
 
-valid_transform = A.Compose([
-    A.Normalize()])
-
 
 def label_to_text(label):
     return "".join([label_dict[int(c)] for c in label])
