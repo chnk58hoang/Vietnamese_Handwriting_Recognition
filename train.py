@@ -1,15 +1,14 @@
 import os
-from decoder.decoder import GreedySearchDecoder, BeamSearchDecoder
-from data.dataset import VietOCR, num_letters
+
+from data.dataset import VietOCR, my_collate_fn, num_letters
 from network.model import VietOCRVGG16
-from engine import train_model, valid_model, inference, TrainController
+from engine import train_model, valid_model, inference
 from torch.utils.data import DataLoader
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from random import shuffle
 import torch
 import argparse
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -28,7 +27,7 @@ if __name__ == '__main__':
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     # Define network
-    model = VietOCRVGG16(num_letters=num_letters, finetune=args.ft).to(device)
+    model = VietOCRVGG16(num_letters=num_letters).to(device)
 
     # Define dataset and dataloader
 
@@ -43,31 +42,17 @@ if __name__ == '__main__':
     valid_dataset = VietOCR(image_path=args.img_path, image_list=valid_img_list, label_path=args.label_path, img_w=2560,
                             img_h=160, phase='valid')
 
-    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-    valid_dataloader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False)
+    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=my_collate_fn)
+    valid_dataloader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=my_collate_fn)
 
     # Define optimizer,scheduler
     optimizer = Adam(params=model.parameters(), lr=args.lr, weight_decay=0.005)
     lr_scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=2)
 
-    # Define decoder
-
-    if args.mode == 'greedy':
-        decoder = GreedySearchDecoder()
-    elif args.mode == 'beam':
-        decoder = BeamSearchDecoder()
-
-    # Define train controller
-    train_controller = TrainController(lr_scheduler)
-
     for epoch in range(args.epoch):
-        print(f'Epoch: {epoch + 1}/{args.epoch}')
         train_loss = train_model(model, device, train_dataset, train_dataloader, optimizer)
-        print(f'Training loss: {train_loss}')
+        print(f'Training loss:{train_loss}')
         val_loss = valid_model(model, device, valid_dataset, valid_dataloader)
-        print(f'Validation loss: {val_loss}')
-        inference(model, device, valid_dataset, args.batch_size, decoder)
-        train_controller(val_loss, epoch, model, optimizer)
-        if train_controller.stop:
-            print('Early stopped')
-            break
+        print(f'Validation loss:{val_loss}')
+        lr_scheduler.step(val_loss)
+        inference(model, device, valid_dataset, args.mode)

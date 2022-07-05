@@ -3,12 +3,13 @@ import torch.nn as nn
 
 
 class GreedySearchDecoder(nn.Module):
-    def __init__(self, blank=0):
+    def __init__(self, labels, blank=0):
         """
         :param labels: {token:index}
         :param blank: index of blank token
         """
         super(GreedySearchDecoder, self).__init__()
+        self.labels = labels
         self.blank = blank
 
     def forward(self, probs):
@@ -23,22 +24,24 @@ class GreedySearchDecoder(nn.Module):
         "Remove duplicate labels"
         indices = torch.unique_consecutive(indices, dim=-1)
 
+
         "Remove blank labels"
         for index in indices:
-            index = [int(i) for i in index if int(i) != self.blank]
-            results.append(index)
-
+            index = [self.labels[int(i)] for i in index if int(i) != self.blank]
+            joined = "".join(index)
+            results.append(joined)
         return results
 
 
 class BeamSearchDecoder(nn.Module):
-    def __init__(self, blank=0, beam_size=5):
+    def __init__(self, labels, blank = 0, beam_size = 5):
         """
         :param labels: {token:index}
         :param blank: index of blank token
         :param beam_size: max number of hypos to hold after each decode step
         """
         super(BeamSearchDecoder, self).__init__()
+        self.labels = labels
         self.blank = blank
         self.beam_size = beam_size
 
@@ -73,10 +76,11 @@ class BeamSearchDecoder(nn.Module):
         "Remove duplicate labels"
         indices = torch.unique_consecutive(indices, dim=-1)
 
+        "Remove blank labels"
         results = []
 
-        "Remove blank labels"
         for index in indices:
-            index = [int(i) for i in index if int(i) != self.blank]
-            results.append(index)
-        return results
+            index = [self.labels[int(i)] for i in index if i != self.blank]
+            joined = "".join(index)
+            results.append(joined)
+        return

@@ -3,21 +3,26 @@ import os
 import json
 import numpy as np
 from torch.utils.data import Dataset
-from torch.nn.utils.rnn import pad_sequence
 import albumentations as A
 from PIL import Image
 
 letters = " #'%()+,-./:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYabcdeghiklmnopqrstuvxyzÂÊÔàáâãèéêìíòóôõùúýăĐđĩũƠơưạảấầẩậắằẵặẻẽếềểễệỉịọỏốồổỗộớờởỡợụủỨứừửữựỳỵỷỹ"
 num_letters = len(letters) + 1
-max_len = 70
+
+label_dict = {letters.index(c) + 1 :c  for c in letters}
+keys_list = list(label_dict.keys())
+values_list = list(label_dict.values())
+
+valid_transform = A.Compose([
+    A.Normalize()])
+
+
+def label_to_text(label):
+    return "".join([label_dict[int(c)] for c in label])
 
 
 def text_to_label(text):
-    return list(map(lambda x: letters.index(x), text))
-
-
-def label_to_text(labels):
-    return ''.join(list(map(lambda x: letters[x] if x < len(letters) else "", labels)))
+    return [keys_list[values_list.index(c)] for c in text]
 
 
 class VietOCR(Dataset):
@@ -50,12 +55,33 @@ class VietOCR(Dataset):
         image = np.array(image)
         image = self.transform(image=image)['image']
         image = torch.tensor(image, dtype=torch.float32)
-        image = image.permute(2, 0, 1)
+        image = image.permute(2,0,1)
 
         # label
 
-        text = self.all_labels[self.all_images[index]]
-        label = text_to_label(text)
+        label = self.all_labels[self.all_images[index]]
+        label = text_to_label(label)
+
         label_length = len(label)
 
-        return image, torch.tensor(label), torch.tensor(label_length)
+        return image, label, label_length
+
+
+def my_collate_fn(batch):
+    labels = []
+    imgs = []
+    label_lengths = []
+
+    for sample in batch:
+        label = sample[1]
+        label += [1] * (70 - sample[2])
+
+        labels.append(torch.tensor(label))
+        imgs.append(sample[0])
+        label_lengths.append(sample[2])
+
+    imgs = torch.stack(imgs, dim=0)
+    label_lengths = torch.tensor(label_lengths)
+    labels = torch.stack(labels, dim=0)
+
+    return imgs, labels, label_lengths
