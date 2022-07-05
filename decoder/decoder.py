@@ -3,13 +3,12 @@ import torch.nn as nn
 
 
 class GreedySearchDecoder(nn.Module):
-    def __init__(self, labels, blank=0):
+    def __init__(self, blank=0):
         """
         :param labels: {token:index}
         :param blank: index of blank token
         """
         super(GreedySearchDecoder, self).__init__()
-        self.labels = labels
         self.blank = blank
 
     def forward(self, probs):
@@ -26,22 +25,20 @@ class GreedySearchDecoder(nn.Module):
 
         "Remove blank labels"
         for index in indices:
-            index = [self.labels[int(i)] for i in index if int(i) != self.blank]
-            decode_str = "".join(index)
-            results.append(decode_str)
+            index = [int(i) for i in index if int(i) != self.blank]
+            results.append(index)
 
         return results
 
 
 class BeamSearchDecoder(nn.Module):
-    def __init__(self, labels, blank=0, beam_size=5):
+    def __init__(self, blank=0, beam_size=5):
         """
         :param labels: {token:index}
         :param blank: index of blank token
         :param beam_size: max number of hypos to hold after each decode step
         """
         super(BeamSearchDecoder, self).__init__()
-        self.labels = labels
         self.blank = blank
         self.beam_size = beam_size
 
@@ -80,8 +77,6 @@ class BeamSearchDecoder(nn.Module):
 
         "Remove blank labels"
         for index in indices:
-            index = [self.labels[int(i)] for i in index if int(i) != self.blank]
-            decode_str = "".join(index)
-            results.append(decode_str)
-
+            index = [int(i) for i in index if int(i) != self.blank]
+            results.append(index)
         return results

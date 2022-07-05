@@ -1,6 +1,6 @@
 import os
 from decoder.decoder import GreedySearchDecoder, BeamSearchDecoder
-from data.dataset import VietOCR, my_collate_fn, num_letters, label_dict
+from data.dataset import VietOCR, num_letters
 from network.model import VietOCRVGG16
 from engine import train_model, valid_model, inference, TrainController
 from torch.utils.data import DataLoader
@@ -9,6 +9,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from random import shuffle
 import torch
 import argparse
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -42,8 +43,8 @@ if __name__ == '__main__':
     valid_dataset = VietOCR(image_path=args.img_path, image_list=valid_img_list, label_path=args.label_path, img_w=2560,
                             img_h=160, phase='valid')
 
-    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=my_collate_fn)
-    valid_dataloader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=my_collate_fn)
+    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
+    valid_dataloader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False)
 
     # Define optimizer,scheduler
     optimizer = Adam(params=model.parameters(), lr=args.lr, weight_decay=0.005)
@@ -52,9 +53,9 @@ if __name__ == '__main__':
     # Define decoder
 
     if args.mode == 'greedy':
-        decoder = GreedySearchDecoder(labels=label_dict)
+        decoder = GreedySearchDecoder()
     elif args.mode == 'beam':
-        decoder = BeamSearchDecoder(labels=label_dict)
+        decoder = BeamSearchDecoder()
 
     # Define train controller
     train_controller = TrainController(lr_scheduler)
