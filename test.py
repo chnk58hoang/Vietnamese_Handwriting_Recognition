@@ -1,10 +1,16 @@
-import sentencepiece as spm
+letters = " #'%()+,-./:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYabcdeghiklmnopqrstuvxyzÂÊÔàáâãèéêìíòóôõùúýăĐđĩũƠơưạảấầẩậắằẵặẻẽếềểễệỉịọỏốồổỗộớờởỡợụủỨứừửữựỳỵỷỹ"
+label_dict = {letters.index(c): c for c in letters}
+label_dict[140] = 'blank'
+
+all_labels = list(label_dict.keys())
+all_chars = list(label_dict.values())
+
+def label_to_text(label):
+    return [label_dict[l] for l in label]
+
+def text_to_label(text):
+    return [all_labels[all_chars.index(c)] for c in text]
+
+print(text_to_label("abc"))
 
 
-x = [[1,2,3,0],[1,2,0,0],[1,0,0,2]]
-clean_x = []
-for xx in x:
-    xx = [k for k in xx if k != 0]
-    clean_x.append(xx)
-
-print(clean_x)

@@ -1,7 +1,7 @@
 import torch
 from tqdm import tqdm
 from torch.utils.data import Subset, DataLoader
-from data.dataset import my_collate_fn
+from data.dataset import my_collate_fn,label_to_text
 import editdistance
 
 
@@ -75,7 +75,7 @@ def valid_model(model, device, dataset, dataloader):
         return valid_loss / counter
 
 
-def inference(model, device, dataset, batch_size, probs_decoder, label_decoder):
+def inference(model, device, dataset, batch_size, probs_decoder):
     model.eval()
     subset_indices = torch.randint(size=(3,), low=0, high=len(dataset))
 
@@ -89,17 +89,16 @@ def inference(model, device, dataset, batch_size, probs_decoder, label_decoder):
         targets = data[1].to(device)
         target_lengths = data[2].to(device)
 
-        probs = model(images)
-        results, clean_indices = probs_decoder(probs)
-        labels = label_decoder(targets)
+        probs,_ = model(images)
+        results = probs_decoder(probs)
 
         for i in range(len(results)):
             print("Predictions:")
             print(results[i])
             print("Labels")
-            print(labels[i])
-
-            mean_norm_ed += editdistance.eval(results[i], labels[i]) / target_lengths[i]
+            text = label_to_text(targets[i])
+            print(text)
+            mean_norm_ed += editdistance.eval(results[i], text) / target_lengths[i]
 
         mean_norm_ed /= dataloader.batch_size
 

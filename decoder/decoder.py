@@ -2,32 +2,14 @@ import torch
 import torch.nn as nn
 
 
-class LabelDecoder(nn.Module):
-    def __init__(self, decoder, blank=0):
-        self.decoder = decoder
-        self.blank = blank
-
-    def forward(self, labels):
-        clean_labels = []
-        decoded_labels = []
-        for label in labels:
-            label = [int(i) for i in label if int(i) != self.blank]
-            clean_labels.append(label)
-
-        for label in clean_labels:
-            decoded_labels.append(self.decoder.decode_ids(label))
-
-        return decoded_labels
-
-
 class GreedySearchDecoder(nn.Module):
-    def __init__(self, decoder, blank=0):
+    def __init__(self, labels, blank=140):
         """
         :param labels: {token:index}
         :param blank: index of blank token
         """
         super(GreedySearchDecoder, self).__init__()
-        self.decoder = decoder
+        self.labels = labels
         self.blank = blank
 
     def forward(self, probs):
@@ -43,21 +25,16 @@ class GreedySearchDecoder(nn.Module):
         indices = torch.unique_consecutive(indices, dim=-1)
 
         "Remove blank labels"
-        clean_indices = []
         for index in indices:
-            index = [int(i) for i in index if int(i) != self.blank]
-            clean_indices.append(index)
+            index = [self.labels[int(i)] for i in index if int(i) != self.blank]
+            decode_str = "".join(index)
+            results.append(decode_str)
 
-        "Decode"
-        for index in clean_indices:
-            decoded_str = self.decoder.decode_ids(index)
-            results.append(decoded_str)
-
-        return results, clean_indices
+        return results
 
 
 class BeamSearchDecoder(nn.Module):
-    def __init__(self, decoder, blank=0, beam_size=5):
+    def __init__(self, decoder, blank=140, beam_size=5):
         """
         :param labels: {token:index}
         :param blank: index of blank token
@@ -99,15 +76,12 @@ class BeamSearchDecoder(nn.Module):
         "Remove duplicate labels"
         indices = torch.unique_consecutive(indices, dim=-1)
 
-        "Remove blank labels"
-        clean_indices = []
-        for index in indices:
-            index = [int(i) for i in index if int(i) != self.blank]
-            clean_indices.append(index)
-
         results = []
 
-        for index in clean_indices:
-            decoded_str = self.decoder.decode_ids(index)
-            results.append(decoded_str)
-        return results, clean_indices
+        "Remove blank labels"
+        for index in indices:
+            index = [self.labels[int(i)] for i in index if int(i) != self.blank]
+            decode_str = "".join(index)
+            results.append(decode_str)
+
+        return results
