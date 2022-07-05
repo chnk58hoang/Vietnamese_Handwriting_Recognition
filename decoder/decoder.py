@@ -83,4 +83,4 @@ class BeamSearchDecoder(nn.Module):
             index = [self.labels[int(i)] for i in index if i != self.blank]
             joined = "".join(index)
             results.append(joined)
-        return
+        return results

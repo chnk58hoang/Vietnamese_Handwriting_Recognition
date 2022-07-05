@@ -9,8 +9,10 @@ class VietOCRVGG16(nn.Module):
         super(VietOCRVGG16, self).__init__()
         self.backbone = vgg16(pretrained=True)
 
-        for param in self.backbone.parameters():
-            param.requires_grad = finetune
+        if finetune:
+            print("Unfreezing backbone layers...")
+            for param in self.backbone.parameters():
+                param.requires_grad = True
 
         self.fc1 = nn.Linear(2560, 512)
         self.bi_lstm = nn.LSTM(512, 512, batch_first=True, bidirectional=True)

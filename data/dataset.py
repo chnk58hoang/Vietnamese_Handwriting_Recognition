@@ -3,6 +3,7 @@ import os
 import json
 import numpy as np
 from torch.utils.data import Dataset
+from torch.nn.utils.rnn import pad_sequence
 import albumentations as A
 from PIL import Image
 
@@ -37,8 +38,8 @@ class VietOCR(Dataset):
 
         if self.phase == 'train':
             self.transform = A.Compose([
-                A.GaussNoise(var_limit=(100, 200), mean=30),
-                A.Cutout(num_holes=15, max_h_size=20, max_w_size=20, fill_value=(255, 255, 255)),
+                A.GaussNoise(var_limit=(100, 200)),
+                A.Cutout(num_holes=15, max_h_size=20, max_w_size=20),
                 A.ElasticTransform(alpha_affine=0.5, alpha=1, sigma=0),
                 A.Normalize(), A.Resize(self.img_h, self.img_w)])
         else:
@@ -64,24 +65,12 @@ class VietOCR(Dataset):
 
         label_length = len(label)
 
-        return image, label, label_length
+        return image, torch.tensor(label), torch.tensor(label_length)
 
 
 def my_collate_fn(batch):
-    labels = []
-    imgs = []
-    label_lengths = []
-
-    for sample in batch:
-        label = sample[1]
-        label += [1] * (70 - sample[2])
-
-        labels.append(torch.tensor(label))
-        imgs.append(sample[0])
-        label_lengths.append(sample[2])
-
-    imgs = torch.stack(imgs, dim=0)
-    label_lengths = torch.tensor(label_lengths)
-    labels = torch.stack(labels, dim=0)
-
-    return imgs, labels, label_lengths
+    (imgs,labels,label_lens) = zip(*batch)
+    all_imgs = torch.stack([img for img in imgs],dim=0)
+    all_labels = pad_sequence([torch.tensor(label) for label in labels],batch_first=True)
+    all_lens = torch.tensor([length for length in label_lens])
+    return all_imgs,all_labels,all_lens

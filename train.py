@@ -1,8 +1,8 @@
 import os
-
-from data.dataset import VietOCR, my_collate_fn, num_letters
+from decoder.decoder import GreedySearchDecoder, BeamSearchDecoder
+from data.dataset import VietOCR, my_collate_fn, num_letters, label_dict
 from network.model import VietOCRVGG16
-from engine import train_model, valid_model, inference
+from engine import train_model, valid_model, inference,Trainer
 from torch.utils.data import DataLoader
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -49,10 +49,25 @@ if __name__ == '__main__':
     optimizer = Adam(params=model.parameters(), lr=args.lr, weight_decay=0.005)
     lr_scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=2)
 
+
+    # Define trainer
+    trainer = Trainer(lr_scheduler)
+
+    # Define decoder
+    if args.mode == 'greedy':
+        decoder = GreedySearchDecoder(labels=label_dict)
+    elif args.mode == 'beam':
+        decoder = BeamSearchDecoder(labels=label_dict)
+
+
+
     for epoch in range(args.epoch):
+        print(f"Epoch {epoch+1} / {args.epoch}")
         train_loss = train_model(model, device, train_dataset, train_dataloader, optimizer)
         print(f'Training loss:{train_loss}')
         val_loss = valid_model(model, device, valid_dataset, valid_dataloader)
         print(f'Validation loss:{val_loss}')
-        lr_scheduler.step(val_loss)
-        inference(model, device, valid_dataset, args.mode)
+        inference(model, device, valid_dataset, args.mode, decoder)
+        trainer(val_loss,model,epoch,optimizer)
+        if trainer.stop:
+            break
