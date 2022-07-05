@@ -1,6 +1,6 @@
 import os
 from decoder.decoder import GreedySearchDecoder, BeamSearchDecoder
-from data.dataset import VietOCR, my_collate_fn, num_letters
+from data.dataset import VietOCR, my_collate_fn, num_letters, label_dict
 from network.model import VietOCRVGG16
 from engine import train_model, valid_model, inference, TrainController
 from torch.utils.data import DataLoader
@@ -9,7 +9,6 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from random import shuffle
 import torch
 import argparse
-import sentencepiece as spm
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -52,13 +51,10 @@ if __name__ == '__main__':
 
     # Define decoder
 
-    sp = spm.SentencePieceProcessor()
-    sp.load('vocab/m.model')
-
     if args.mode == 'greedy':
-        decoder = GreedySearchDecoder(decoder=sp)
+        decoder = GreedySearchDecoder(labels=label_dict)
     elif args.mode == 'beam':
-        decoder = BeamSearchDecoder(decoder=sp)
+        decoder = BeamSearchDecoder(labels=label_dict)
 
     # Define train controller
     train_controller = TrainController(lr_scheduler)

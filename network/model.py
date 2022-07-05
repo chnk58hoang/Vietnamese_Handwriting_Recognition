@@ -20,7 +20,7 @@ class VietOCRVGG16(nn.Module):
         self.relu = nn.ReLU()
         self.log_softmax = nn.LogSoftmax(dim=-1)
         self.softmax = nn.Softmax(dim=-1)
-        self.loss_fn = nn.CTCLoss(blank=140)
+        self.loss_fn = nn.CTCLoss(blank=0)
 
     def forward(self, x, target=None, target_length=None):
         x = self.backbone.features(x)

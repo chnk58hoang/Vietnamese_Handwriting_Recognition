@@ -7,24 +7,17 @@ from torch.nn.utils.rnn import pad_sequence
 import albumentations as A
 from PIL import Image
 
-
 letters = " #'%()+,-./:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYabcdeghiklmnopqrstuvxyzÂÊÔàáâãèéêìíòóôõùúýăĐđĩũƠơưạảấầẩậắằẵặẻẽếềểễệỉịọỏốồổỗộớờởỡợụủỨứừửữựỳỵỷỹ"
-label_dict = {letters.index(c): c for c in letters}
-label_dict[140] = 'blank'
-
-num_letters = len(label_dict)
-
-
-all_labels = list(label_dict.keys())
-all_chars = list(label_dict.values())
-
-
-def label_to_text(label):
-    return [label_dict[l] for l in label]
+num_letters = len(letters) + 1
+max_len = 70
 
 
 def text_to_label(text):
-    return [all_labels[all_chars.index(c)] for c in text]
+    return list(map(lambda x: letters.index(x), text))
+
+
+def label_to_text(labels):
+    return ''.join(list(map(lambda x: letters[x] if x < len(letters) else "", labels)))
 
 
 class VietOCR(Dataset):
@@ -65,17 +58,4 @@ class VietOCR(Dataset):
         label = text_to_label(text)
         label_length = len(label)
 
-        return image, label, label_length
-
-
-def my_collate_fn(batch):
-    (images, labels, label_lengths) = zip(*batch)
-
-    all_imgs = torch.stack([img for img in images], dim=0)
-    all_labels = [torch.tensor(label) for label in labels]
-
-    all_labels = pad_sequence(all_labels, batch_first=True, padding_value=140)
-
-    all_lengths = torch.tensor([length for length in label_lengths])
-
-    return all_imgs, all_labels, all_lengths
+        return image, torch.tensor(label), torch.tensor(label_length)

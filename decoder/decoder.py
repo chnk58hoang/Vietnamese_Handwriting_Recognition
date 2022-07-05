@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class GreedySearchDecoder(nn.Module):
-    def __init__(self, labels, blank=140):
+    def __init__(self, labels, blank=0):
         """
         :param labels: {token:index}
         :param blank: index of blank token
@@ -34,14 +34,14 @@ class GreedySearchDecoder(nn.Module):
 
 
 class BeamSearchDecoder(nn.Module):
-    def __init__(self, decoder, blank=140, beam_size=5):
+    def __init__(self, labels, blank=0, beam_size=5):
         """
         :param labels: {token:index}
         :param blank: index of blank token
         :param beam_size: max number of hypos to hold after each decode step
         """
         super(BeamSearchDecoder, self).__init__()
-        self.decoder = decoder
+        self.labels = labels
         self.blank = blank
         self.beam_size = beam_size
 
