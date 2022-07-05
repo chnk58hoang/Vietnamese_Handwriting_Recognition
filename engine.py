@@ -99,7 +99,7 @@ def inference(model, device, dataset, mode,decoder):
 
         mean_norm_ed = 0.0
         for i in range(len(all_labels)):
-            print("Prediction: {0:50} Label: {1}".format(all_preds[i],
+            print("Prediction: {0:70} Label: {1}".format(all_preds[i],
                                                              all_labels[i]))
             mean_norm_ed += editdistance.eval(all_preds[i], all_labels[i])
             mean_norm_ed /= len(all_labels[i])
