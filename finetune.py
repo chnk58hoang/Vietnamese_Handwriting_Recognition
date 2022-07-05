@@ -27,7 +27,9 @@ if __name__ == '__main__':
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     # Define network
-    model = VietOCRVGG16(num_letters=num_letters).to(device)
+    model = VietOCRVGG16(num_letters=num_letters,finetune=args.ft)
+    model.load_state_dict(torch.load('checkpoints/best_model.pth'))
+    model.to(device)
 
     # Define dataset and dataloader
 
