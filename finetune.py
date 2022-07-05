@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
 
     for epoch in range(args.epoch):
-        print(f"Epoch {epoch+1} / {args.epoch}")
+        print(f"Epoch {epoch + 1} / {args.epoch}")
         train_loss = train_model(model, device, train_dataset, train_dataloader, optimizer)
         print(f'Training loss:{train_loss}')
         val_loss = valid_model(model, device, valid_dataset, valid_dataloader)
