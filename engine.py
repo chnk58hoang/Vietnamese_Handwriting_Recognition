@@ -73,7 +73,7 @@ def valid_model(model, device, dataset, dataloader):
         return valid_loss / len(dataloader)
 
 
-def inference(model, device, dataset, mode,decoder):
+def inference(model, device, dataset, mode, decoder):
     model.eval()
     subset_indices = torch.randint(size=(3,), low=0, high=len(dataset))
 
@@ -99,8 +99,8 @@ def inference(model, device, dataset, mode,decoder):
 
         mean_norm_ed = 0.0
         for i in range(len(all_labels)):
-            print("Prediction: {0:70} Label: {1}".format(all_preds[i],
-                                                             all_labels[i]))
+            print("Label: {0:70} Prediction: {1}".format(all_labels[i],
+                                                         all_preds[i]))
             mean_norm_ed += editdistance.eval(all_preds[i], all_labels[i])
             mean_norm_ed /= len(all_labels[i])
         mean_norm_ed /= len(all_labels)
