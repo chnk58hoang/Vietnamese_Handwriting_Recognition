@@ -21,11 +21,8 @@ class Trainer():
             self.best_val_loss = current_valid_loss
             self.counter = 0
 
-            torch.save({
-                'epoch': epoch + 1,
-                'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-            }, self.save_path)
+            print('Saving best model ...')
+            torch.save(model.state_dict(),self.save_path)
 
         else:
             self.counter += 1
