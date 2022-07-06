@@ -12,7 +12,7 @@ class Trainer():
         self.save_path = save_path
         self.best_val_loss = best_val_loss
         self.counter = 0
-        self.min_delta = 1e-2
+        self.min_delta = 1e-3
         self.stop = False
 
     def __call__(self, current_valid_loss, model, epoch, optimizer):
