@@ -41,7 +41,9 @@ python finetune.py --epoch [num of epochs] --img_path [path to img directory] --
 I used [CTC](https://towardsdatascience.com/intuitively-understanding-connectionist-temporal-classification-3797e43a86c) as loss function. There are two strageties for decoding task, [Greedy or BeamSearch](https://d2l.ai/chapter_recurrent-modern/beam-search.html) decoder.
 <p align="center"><img src="./imgs/beam-search.svg" height=250></p>
 
-![image](https://user-images.githubusercontent.com/71833423/163555701-29d56de7-be85-4f22-a8f3-609137a59af7.png)
+# Inference
+<p align="center"><img src="./imgs/infer1.png" height=100></p>
+<p align="center"><img src="./imgs/infer2.png" height=100></p>
 
 # Result
 <p align="center"><img src="./imgs/result1.png" height=150></p>
