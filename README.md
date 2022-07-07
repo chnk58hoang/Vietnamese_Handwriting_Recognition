@@ -42,8 +42,8 @@ I used [CTC](https://towardsdatascience.com/intuitively-understanding-connection
 <p align="center"><img src="./imgs/beam-search.svg" height=250></p>
 
 # Inference
-<p align="center"><img src="./imgs/infer1.png" height=100></p>
-<p align="center"><img src="./imgs/infer2.png" height=100></p>
+<p align="center"><img src="./imgs/infer1.png" height=80></p>
+<p align="center"><img src="./imgs/infer2.png" height=80></p>
 
 # Result
 <p align="center"><img src="./imgs/result1.png" height=150></p>
