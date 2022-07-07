@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
     # Define optimizer,scheduler
     optimizer = Adam(params=model.parameters(), lr=args.lr, weight_decay=0.005)
-    lr_scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=2)
+    lr_scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.2, patience=1)
 
 
     # Define trainer
