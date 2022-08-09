@@ -20,7 +20,7 @@ This [dataset](https://drive.google.com/drive/folders/1Qa2YA6w6V5MaNV-qxqhsHHoYF
 
 # Preprocessing
 In this step, we have to 
-- Convert images to grayscale and apply Ostu'threshold to remove backgrounds
+- Binarized image by applying Otsu'thresholding method
 - Remove noise
 - Smooth boundaries by applying Contour Filter
 
