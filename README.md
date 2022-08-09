@@ -20,7 +20,7 @@ This [dataset](https://drive.google.com/drive/folders/1Qa2YA6w6V5MaNV-qxqhsHHoYF
 
 # Preprocessing
 In this step, we have to 
-- Binarized image by applying Otsu'thresholding method
+- Binarized image by applying Otsu's thresholding method
 - Remove noise
 - Smooth boundaries by applying Contour Filter
 
