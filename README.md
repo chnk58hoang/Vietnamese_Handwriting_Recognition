@@ -11,9 +11,7 @@ This model is based on the proposed architecture in this paper: https://arxiv.or
 # Requirements
 I highly recommend using conda virtual environment
 ```bash
-conda install pytorch torchvision
-pip install albumentations
-pip install editdistance
+pip install -r requirements.txt
 ```
 # Dataset
 This [dataset](https://drive.google.com/drive/folders/1Qa2YA6w6V5MaNV-qxqhsHHoYFRK5JB39) is provided by [Cinamon AI](https://cinnamon.is/vi/) for Cinamon's AI Challenge.
