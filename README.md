@@ -38,7 +38,7 @@ python finetune.py --epoch [num of epochs] --img_path [path to img directory] --
 ```
 
 # Decoding
-I used [CTC](https://towardsdatascience.com/intuitively-understanding-connectionist-temporal-classification-3797e43a86c) as loss function. There are two strageties for decoding task, [Greedy or BeamSearch](https://d2l.ai/chapter_recurrent-modern/beam-search.html) decoder.
+I used [CTC](https://towardsdatascience.com/intuitively-understanding-connectionist-temporal-classification-3797e43a86c) as loss function. There are two strategies for decoding task, [Greedy or BeamSearch](https://d2l.ai/chapter_recurrent-modern/beam-search.html) decoder.
 <p align="center"><img src="./imgs/beam-search.svg" height=250></p>
 
 # Inference
